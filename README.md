@@ -17,7 +17,7 @@
   - [Querying](#querying)
   - [Service Discovery](#service-discovery)
     - [EC2 Example](#ec2-example)
-    - [Kubernetes examples](#kubernetes-examples)
+    - [Kubernetes Example](#kubernetes-example)
     - [DNS Example](#dns-example)
     - [Using file](#using-file)
   - [Exporters](#exporters)
@@ -370,7 +370,7 @@ scrape_configs:
 * Make sure the user has the following IAM role: AmazonEC2ReadOnlyAccess
 * Make sure you security grups allow access to port (9100, 9090)
 
-### Kubernetes examples
+### Kubernetes Example
 ```yaml
 - job_name: 'kubernetes-pods'
     kubernetes_sd_configs:
