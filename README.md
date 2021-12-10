@@ -50,10 +50,11 @@
 * It fits very well in the cloud native infrastructure.
 * Prometheus is also a member of the CNCF (Cloud Native Fundation Computing).
 * In Prometheus we talk about Dimensional Data: time series are idenfified by metric name and a set of key/value pairs.
-
+<center>
 | Metric name  | label  | Sample  |
 |--------------|--------|---------|
 | Temperature  | location=outside  | 90  |
+</center>
 
 * Prometheus includes a Flexible Query Language
 * Visualizations can be shown using a built-in expression browser or with integrations like Grafana.
