@@ -50,11 +50,10 @@
 * It fits very well in the cloud native infrastructure.
 * Prometheus is also a member of the CNCF (Cloud Native Fundation Computing).
 * In Prometheus we talk about Dimensional Data: time series are idenfified by metric name and a set of key/value pairs.
-<center>
+
 | Metric name  | label  | Sample  |
 |--------------|--------|---------|
 | Temperature  | location=outside  | 90  |
-</center>
 
 * Prometheus includes a Flexible Query Language
 * Visualizations can be shown using a built-in expression browser or with integrations like Grafana.
@@ -80,6 +79,17 @@ $ minikube start --network-plugin=cni --cni=calico -p prometheus
 
 # Install kubeprometheus stack
 $ helm install prometheus prometheus-community/kube-prometheus-stack
+
+# Explore default namespace
+$ kubectl get po
+
+NAME                                                     READY   STATUS    RESTARTS       AGE
+alertmanager-prometheus-kube-prometheus-alertmanager-0   2/2     Running   2 (142m ago)   21h
+prometheus-grafana-c8787f89b-hfvtv                       2/2     Running   2 (142m ago)   21h
+prometheus-kube-prometheus-operator-577bb648c5-dnd9q     1/1     Running   1 (142m ago)   21h
+prometheus-kube-state-metrics-58c5cd6ddb-2q2wr           1/1     Running   1 (142m ago)   21h
+prometheus-prometheus-kube-prometheus-prometheus-0       2/2     Running   2 (142m ago)   21h
+prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (142m ago)   21h
 ```
 
 
