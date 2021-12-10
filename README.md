@@ -94,7 +94,7 @@ prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (14
 
 
 ## Basic Concepts
-* All data is stored as time series
+* All data is stored as time series.
   * Every time sries is identified by the __metric name__ and a set of __key-value pairs__, called __labels__.
 
 ![Prometheus Concepts](images/prometheus_concepts.png)
@@ -103,9 +103,9 @@ prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (14
 |--------------|--------|---------|
 | go_memstat_alloc_bytes  | {container="alertmanager", endpoint="web", instance="10.244.116.72:9093", job="prometheus-kube-prometheus-alertmanager", namespace="default", pod="alertmanager-prometheus-kube-prometheus-alertmanager-0", service="prometheus-kube-prometheus-alertmanager"}  | 8569840  |
 
-* The time series data also consists of the actual data, called Samples:
-  * It can be a float64 value
-  * or a milisecond-precision timestamp
+* The time series data also consists of the actual data, called __Samples__:
+  * It can be a float64 value.
+  * Or a milisecond-precision timestamp.
 * The notation of time series is often using this notation:
   * `<metric name>{<label name>=<label value>, ...}`
   * For example:
@@ -140,12 +140,11 @@ rule_files:
 ## Monitoring Nodes with Prometheus
 * To monitor nodes, you need to install the __node-exporter__.
 * The node exporter will expose machine metrics of Linux machines.
-  * For example: cpu usage, memory usage
+  * For example: cpu usage, memory usage, ...
 * The node exporter can be used to monitor machines, and later on, you can __create alerts based on these ingested metrics__.
 * For Windows, there's a WMI exporter.
 ![Prometheus monitor nodes](images/prometheus_nodes_monitor.png)
 
-* Posteriormente necesitará configurar prometheus para ir a por esas métricas:
 ```yaml
 # my global config
 global:
