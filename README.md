@@ -68,17 +68,18 @@
 ## Prometheus instalation on Kubernetes
 First step, create your enviroment:
 ```sh
-# Minikube start
+# Initial your test environment
 $ minikube start --network-plugin=cni --cni=calico -p prometheus
 
 # Install kubeprometheus stack
-$ prometheus-community/kube-prometheus-stack
+$ helm install prometheus prometheus-community/kube-prometheus-stack
 ```
 
 
 ## Basic Concepts
 * All data is stored as time series
   * Every time sries is identified by the __metric name__ and a set of __key-value pairs__, called __labels__.
+
 ![Prometheus Concepts](images/prometheus_concepts.png)
 
 | Metric name  | label  | Sample  |
@@ -120,9 +121,9 @@ rule_files:
 
 
 ## Monitoring Nodes with Prometheus
-* To monitor nodes, you need to install the node-exporter.
+* To monitor nodes, you need to install the __node-exporter__.
 * The node exporter will expose machine metrics of Linux machines.
-  * for example: cpu usage, memory usage
+  * For example: cpu usage, memory usage
 * The node exporter can be used to monitor machines, and later on, you can __create alerts based on these ingested metrics__.
 * For Windows, there's a WMI exporter.
 ![Prometheus monitor nodes](images/prometheus_nodes_monitor.png)
