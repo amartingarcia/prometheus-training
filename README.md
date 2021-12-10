@@ -393,13 +393,176 @@ scrape_configs:
     }
 ]
 ```
+
 ## Exporters
+* Build for exporting prometheus metrics from existing 3rd party metrics.
+* When Prometheus is not able to pull metrics directly(Linux sys stats, haproxy, ...).
+* Examples:
+  * MySQL server exporter
+  * Memcached exporter
+  * Consul exporter
+  * Redis
+  * MongoDB
+  * ...
+* https://prometheus.io/docs/instrumenting/exporters/
+* We are already using one:
+```yaml
+- job_name: 'node_exporter'
+  scrape_interval: 5s
+  static_configs:
+    - targets: ['localhost:9100']
+```
+
 ## Extras
+* https://prometheus.io/docs/instrumenting/writing_exporters/
+
 
 # Alerting
 ## Introduction to Alerting
-## Setting Up Alerts
+* Alerting in Prometheus is separated into 2 parts:
+  * Alerting rules in Prometheus Server
+  * Alertmanager
+![Prometheus alerting](images/prometheus_alerting.png)
+
+* Rules live in Prometheus server config
+* Best practice to separate the alerts from the prometheus config
+  * Add an include to /etc/prometheus/prometheus.yml
+```yaml
+rule_files:
+- "/etc/prometheus/alert.rules"
+```
+* Alert format:
+```yaml
+ALERT <alert name>
+  IF <expression>
+    [ FOR <duration> ]
+    [ LABELS <label set> ]
+    [ ANNOTATIONS <label set> ]
+```
+* Alert example:
+```yaml
+groups:
+- name: example
+  rules:
+  - alert: HighRequestLatency
+    expr: job:request_latency_seconds:mean5m{job="myjob"} > 0.5
+    for: 10m
+    labels:
+      severity: page
+    annotations:
+      summary: High request latency
+```
+
+* Alerting rules allow you to define the alert conditions
+* Alerting rules sent the alerts being fired to an external service.
+* The format of these alerts is in the Prometheus expression language.
+* Example:
+```yaml
+groups:
+- name: Instances
+  rules:
+  # Alerts
+  - alert: InstanceDown
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been dowf for more than 5 minutes."
+```
+
+* Alertmanager handles the alerts fired by the prometheus server.
+* Handles deduplication, grouping and routing of alerts.
+* Routes alerts to receivers (Pagerduty, Opsgenie, email, Slack, telegram, ...)
+* Alertmanager configuration /etc/alertmanager/alertmanager.yaml:
+
+```yaml
+global:
+  # Also possible to place this URL in a file.
+  # Ex: `slack_api_url_file: '/etc/alertmanager/slack_url'`
+  slack_api_url: '<slack_webhook_url>'
+
+route:
+  receiver: 'slack-notifications'
+  repeat_interval: 1h
+  group_by: [alertname, datacenter, app]
+
+receivers:
+- name: 'slack-notifications'
+  email_configs:
+  - to: 'operations-team@example.org'
+  slack_configs:
+  - channel: '#alerts'
+    text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
+```
+
+* Prometheus configuration:
+
+```yaml
+global:
+    scrape_interval: 1s
+    evaluation_interval: 1s
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - localhost:9093
+
+scrape_configs:
+    - job_name: 'node'
+      ec2_sd_configs:
+        - region: eu-west-1
+          access_key: XX
+          secret_key: XX
+          port: 9100
+      relabel_configs:
+        # Only monitor instances with a tag Name starting with "PROD"
+        - source_labels: [_meta_ec2_tag_name]
+          regex: PROD.*
+          action: keep
+```
+
+* Concepts:
+  * Grouping: Groups similar alerts into 1 notification.
+  * Inhibition: Silences other alerts if one specified alert is already fired
+  * Silences: A simple way to mute certain notifications.
+
+* High availability
+  * You can create a high available Alertmanager cluster using mesh config
+  * Do not load balance this service
+    * Use a list of Alertmanager nodedes in Prometheus config
+  * All alerts are sent to all known Alertmanager nodes.
+  * No need to monitor the monitoring
+
+* Alert states:
+  * Inactive: No rule is met
+  * Pending: Rule is meet but can be supressed due to validations
+  * Firing: Alert is sent to the configured channel (mail, Slack, ...)
+* Runs on port: 9093
+![Prometheus alertmanager](images/prometheus_alertmanager.png)
+
+* Notifying multiple destinations:
+```yaml
+route:
+  receiver: 'operations-team'
+  repeat_interval: 1h
+
+receivers:
+- name: 'operations-team'
+  email_configs:
+  - to: 'operations-team@example.org'
+  slack_configs:
+  - api_url: https://hooks.slack.com/services/XXXXXXX/XXXXXXX/XXXXXX
+    channel: '#alerts'
+    send_resolved: true
+```
+
 ## Extras
+* https://prometheus.io/docs/prometheus/latest/configuration/unit_testing_rules/
+* https://awesome-prometheus-alerts.grep.to/
 
 # Internals
 ## Prometheus Storage
