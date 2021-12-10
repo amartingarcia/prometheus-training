@@ -51,6 +51,7 @@ $ prometheus-community/kube-prometheus-stack
 * All data is stored as time series
   * Every time sries is identified by the __metric name__ and a set of __key-value pairs__, called __labels__.
 ![Prometheus Concepts](images/prometheus_concepts.png)
+
 | Metric name  | label  | Sample  |
 |--------------|--------|---------|
 | go_memstat_alloc_bytes  | {container="alertmanager", endpoint="web", instance="10.244.116.72:9093", job="prometheus-kube-prometheus-alertmanager", namespace="default", pod="alertmanager-prometheus-kube-prometheus-alertmanager-0", service="prometheus-kube-prometheus-alertmanager"}  | 8569840  |
