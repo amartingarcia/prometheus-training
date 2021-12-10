@@ -639,19 +639,89 @@ receivers:
 
 
 ## Prometheus Security
-## TLS & Authentication on Prometheus Server
-## Extras
+* At the moment Prometheus __doesn't offer any support for authentication__ or encryption (TLS) on the server componentes.
+  * They argue that they're __focussing on building a monitoring solution__, and want to avoid having to implement complex security features.
+  * You can still enable __authentication__ and __TLS__, using a reverse proxy.
+* This is __only valid for server components__, prometheus can s__crape TLS and authentication__ enabled targets
+  * See __tls_config__ in the promethees configuration to configure a CA certificate, user certificate and user key.
+  * You'd still need to setup a reverse proxy for the targets itself.
+
 
 # Prometheus client implementations
 ## Monitoring a web application - Python Flask
+* i'm going to integrate __prometheus monitoring__ with a __web application__ based on _python_.
+  * i'll use the official __prometheus_client__ library for Python.
+  * __Flask__ is the web framework I'going to use
+    * It will create an __http server__ and I'll able to configure routes (e.g. /query)
+  * I'll use __mysqlclient__ for python to query a __MySQL__ database.
+    * I'll include one normal query and one __"bad behaving" query__ that will take between 0 and 10 seconds to execute.
+
+![Prometheus webapp](images/prometheus_web_app.png)
+
+* I'm going to use the Counter and the Histogram metric types to capture the data:
+  * A Counter to capture the amount of times an http endpint is hit + to capture the amount of times a MySQL query is executed.
+    * The value of the Counter must Allways increase, that's why you should take the Counter type for these of data.
+  * A Histogram to capture the latency of the HTTP requests and the MySQL Queries.
+    *  A Histogram samples observations (like latencies) and counts them in configurable buckets. It also provies a sum of all observed values.
+    *  The default buckets are intended to cover a typical web/rpc request from milliseconds to seconds.
+
+* Define data types:
+```py
+from prometheus_client import Counter, Histogram
+
+FLASK_REQUEST_LATENCY = Histogram('flask_request_latency_seconds', 'Flask Request Latency',
+				['method', 'endpoint'])
+FLASK_REQUEST_COUNT = Counter('flask_request_count', 'Flask Request Count',
+				['method', 'endpoint', 'http_status'])
+
+MYSQL_REQUEST_LATENCY = Histogram('mysql_query_latency_seconds', 'MYSQL Query Latency',
+				['query'])
+MYSQL_REQUEST_COUNT = Counter('mysql_query_count', 'Flask Request Count',
+				['query']
+```
+
+* This is how we can calculate the latency of a query:
+```py
+start_time = time.time()
+sql = "select * from table"
+# do the query
+
+query_latency = time.time() - start_time
+
+MYSQL_REQUEST_LATENCY.labels(sql[:50]).observe(query_latency)
+MYSQL_REQUEST_COUNT.labels(sql[:50]).inc()
+```
+
 ## Calculating Apdex score
 ## Monitoring a wb application - Java Spring
 ## Extras
 
 # Another Use Cases
 ## AWS Cloudwatch Exporter
+
 ## Grafana Provisioning
+* In one of the first lectures I showed you how to __setup Grafana using the UI__.
+* Rather than using the UI, you can also u__se yaml and json files__ to provision Grafana with datasources and dashboards.
+* This is a much more __powerful way__ of using Grafana, as you can test new dashboards firs on a __dev/test server__, then __import__ the newly created dashboards to __production__.
+  * You can do the import manually  through the UI, or __using yaml and json files__.
+  * When using files, you can keep files within __version control__ to keep changes, revisions and backups.
+
 ## Scraping Kubernetes with Prometheus
 ## Consul integration with Prometheus
+* Consul is a distributed, highly available solution providing:
+  * A Service Mesh.
+  * Service Discovery.
+  * Health checks for your services.
+  * A Key-Value store.
+  * Secure Service Communications.
+  * Multi-datacenter support.
+* Consul is often deployed in conjunction with Docker.
+* There are 2 integrations that are interesting to use:
+  * Prometheus can scarpe Consul's metrics and provide you with all sorts of information about your running services.
+    * Consul provides Service Discovery, so it knows where services are running and wath the current state of it is.
+  * Consul can be integrated within Prometheus to automatically add the services as targets.
+    * Consul will discover your services, and these can then be automatically added to Promethues as a target.
+
 ## AWS EC2 Auto Discovery
+
 ## Extras
