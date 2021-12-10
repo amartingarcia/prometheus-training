@@ -1,10 +1,11 @@
-# Training prometheus stack
+# Training Prometheus
 
 # Table of contents
 1. [Introduction](#introduction-to-prometheus)
    1. [Prometheus Overview](#prometheus-overview)
    2. [How does prometheus work?](#how-does-prometheus-work)
    3. [Prometheus Instalation on Kubernetes](#prometheus-instalation-on-kubernetes)
+   4. [Basic Concepts](#basic-concepts)
 
 # Introduction to Prometheus
 ## Prometheus Overview
