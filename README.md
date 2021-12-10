@@ -567,6 +567,77 @@ receivers:
 
 # Internals
 ## Prometheus Storage
+* You can use the defult local __on-disk storage__, or optionally the __remote storage system.__
+  * __Local storage__: a local __time series database__ in a custom Prometeus format.
+  * __Remote storage__: you can read/write samples to a __remote system__ in a __standarized format.__
+    * Currently it uses a __snappy-compressed protocol buffer encoding__ over HTTP, but might change in the future (to use gRPC or HTTP/2)
+
+* Remote storage is primarly focussed at long term storage
+* Currently there are adapters available for the following solutions. https://prometheus.io/docs/operating/integrations/#remote-endpoints-and-storage
+* Prometheus >=2.0 uses a __new storage engine__ which dramatically increases scalability.
+* Ingested samples are __grouped in blocks of two hours__.
+* Those 2h samples are stored in __separate directories__ (in the data directory of prometheus).
+* Writes are batched and written to disk in __chunks__, containing multiple data points.
+![Prometheus storage](images/prometheus_storage.png)
+
+* Every directory also has an __index file__ (index) and a __metadata file__ (meta.json).
+* It stores the __metric names__ and the __labels__, and __provides an index__ from the metric names and labels to the series in the chunk files.
+![Prometheus storage 2](images/prometheus_storage_2.png)
+
+* The most recent data is kept __in memory__.
+* You don't want to loose the in-memory data during a crash, so the __data__ also __needs to be persisted to disk__. This is donde using a __write-ahead-log__ (WAL).
+![Prometheus storage 3](images/prometheus_storage_3.png)
+
+* __Write Ahead Log__ (WAL)
+  * Its quicker to __append__ to a file (like a log) than making (multiple) random read/writes.
+  * If there's a server crash and the data from memory is lost, then the WAL will be __replayed__.
+  * This way, __no data will be lost__ or corrupted during a cash.
+* When series gets deleted, a __tombstone file__ gets created.
+* This is __more efficient__ than immediately deleting the data from the chunk files, as the __actual delete can happen at a later time__ (e.g. when there's not a lot of load)
+![Prometheus storage 4](images/prometheus_storage_4.png)
+
+* The initial 2h blocks are __merged__ in the __background__ the form longer blocks.
+* This is called __compaction__.
+![Prometheus storage 5](images/prometheus_storage_5.png)
+
+* Block characteristics:
+  * A block on the filesystem is a __directory with chunks__.
+  * You can see each blocks as a __fully independent database__ containing all time series for the window.
+  * Every block of data, except the current block, is __immutable__ (no changes can be made).
+  * These non-overlapping blocks are actually a __horizontal partitioning__ of the ingested time series data.
+
+* This __horizontal partitioning__ gives a lot of benefits:
+  * When querying, the __blocks not in the time range__ can be __skipped__.
+  * When __completing a block__, data only needs to be __added__, and not modified (avoids write-amplification)
+  * __Recent data is kept in memory__, so can be queried quicker.
+  * __Deleting old data__ is only a matter of __deleting directories__ on the filesystem.
+
+* __Compactation__:
+  * __When querying__, blocks have to be __merged__ together to be able to __calculate the results__.
+  * Too many blocks could cause __too much merging overhead__, so blocks are compacted.
+    * 2 blocks are merged and f__orm a newly created__ (often larger) __block__.
+    * Compaction can also __modify data: dropping delete data__ or __restructuring the chunks__ to increase the query performance.
+
+* The index:
+  * Having __horizontal partitioning__ already makes __most queries quicker__, but not those that need to go through all the data to get the result
+  * The index is an __inverted index__ to provide better query perfomance, also in cases where all data needs to be queried
+    * Each series is assigned a unique ID (e.g. ID 1 and 2)
+    * The index will contain an inverted index for the labels, for example for label env=production, it'll have 1 and 3 as IDs if those series contain the label env=production.
+
+* What about Disk size?
+  * On average, Prometheus needs 1-2 bytes per sample.
+  * You can use the following formula to calculate the disk sapce needed:
+    * `needed_disk_space = retention_time_seconds * ingested_samples_per_second * bytes_per_sample`
+
+* How to reduce disk size?
+  * You can increase the scrape interval, which will get you less data.
+  * You can decrease the targets or series you scrape.
+  * Or you can reduce the retention (how long you keep the data)
+`--storage.tsdb.retention: This determines when to remove old data. Defaults to 15d.`
+
+* To read the full story of Prometheus time series database, read the blog post from Fabian Reinartz at https://fabxc.org/tsdb/
+
+
 ## Prometheus Security
 ## TLS & Authentication on Prometheus Server
 ## Extras
