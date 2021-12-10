@@ -588,6 +588,7 @@ scrape_configs:
   * __Pending:__ Rule is meet but can be supressed due to validations.
   * __Firing:__ Alert is sent to the configured channel (mail, Slack, ...).
 * Runs on port: 9093.
+
 ![Prometheus alertmanager](images/prometheus_alertmanager.png)
 
 * Notifying multiple destinations:
@@ -660,7 +661,7 @@ receivers:
 * __Compactation__:
   * __When querying__, blocks have to be __merged__ together to be able to __calculate the results__.
   * Too many blocks could cause __too much merging overhead__, so blocks are compacted.
-    * 2 blocks are merged and f__orm a newly created__ (often larger) __block__.
+    * 2 blocks are merged and __form a newly created__ (often larger) __block__.
     * Compaction can also __modify data: dropping delete data__ or __restructuring the chunks__ to increase the query performance.
 
 * The index:
