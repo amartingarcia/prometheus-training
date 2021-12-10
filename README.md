@@ -16,7 +16,7 @@
   - [Pushing Metrics](#pushing-metrics)
   - [Querying](#querying)
   - [Service Discovery](#service-discovery)
-    - [EC2 Example.](#ec2-example)
+    - [EC2 Example](#ec2-example)
     - [Kubernetes examples](#kubernetes-examples)
     - [DNS Example](#dns-example)
     - [Using file](#using-file)
@@ -176,8 +176,8 @@ scrape_configs:
 
 # Monitoring
 ## Client Libraries
-* Instrumenting your code
-* Libraries
+* Instrumenting your code.
+* Libraries:
   * Official: Go, Java/Scala, Python, Ruby
   * Unofficial: bash, C++, Common Lisp, Elixr, Erlang, Haskell, Lua for Nginx, Lua for Tarantool, .NET/C#, Node.js, PHP, Rust
 * No client library available?
@@ -222,14 +222,14 @@ http_request_duration_seconds_count 144320
   * __Counter__. 
     * A value that only goes up (e.g Visits to a website).
   * __Gauge__. 
-    * Single numeric value that an go up and down (e.g CPU load, temperature)
+    * Single numeric value that an go up and down (e.g CPU load, temperature).
   * __Histogram__. 
     * Samples observations (e.g. requests durations or reponse sizes) and these observations get counted into __buckets__. Includes (_count and _sum). Main purpose is calculating quantiles.
   * __Summary__. 
     * Similar to a histogram, a summary samples observtiosn (e.g. request durations or response sizes). A summary also provides a total count of observations and a sum of all observed values, it calculates configurable quantiles over a sliding time window.
-    * Example: you need 2 counters for calculating the latency
-      * 1) Total request(_count)
-      * 2) The total latency of those requets (_sum)
+    * Example: you need 2 counters for calculating the latency.
+      * 1) Total request (___count__).
+      * 2) The total latency of those requets (___sum__).
       * Take the rate() and divide = average latency.
 
 * Client libraries examples https://prometheus.io/docs/instrumenting/clientlibs/
@@ -266,7 +266,7 @@ if __name__ == '__main__':
 
 
 * Only 1 valid use case for the Pushgateway.
-  * Service-lvel batch jobs and not related to a specific machine.
+  * Service-level batch jobs and not related to a specific machine.
 * If NAT or/both firewall is blocking you from using the pull mechanism.
   * Move the Prometheus Server on the same network.
 
@@ -292,10 +292,10 @@ for i in range(90):
   sleep(5)
 ```
 
-* __Pushgateway__ functions take a grouping key.
-  * __push_to_gateway__ replaces metrics with the same grouping key.
-  * __pushadd_to_gateway__ only replaces metrics with the same name and grouping key.
-  * __delete_from_gateway__ delete metrics with the given job and grouping key.
+* __Pushgateway__ functions take a grouping key:
+  * __push_to_gateway:__ replaces metrics with the same grouping key.
+  * __pushadd_to_gateway:__ only replaces metrics with the same name and grouping key.
+  * __delete_from_gateway:__ delete metrics with the given job and grouping key.
 
 
 ## Querying
@@ -307,10 +307,10 @@ for i in range(90):
 * Example:
   * `100 - (avg by (instance) (irate(node_cpu_seconds_total{job='node_exporter',mode="idle"}[5m])) * 100)`
 
-* Instante vector - a set of time series containing a simple sample for each time series, all sharing the same timestamp. Example: `node_cpu_seconds_total`.
-* Range vector - a set of time containing a range of data points over time for each time series. Example: `node_cpu_seconds_total[5m`.
-* Scalar - a simple numeric floating point value. Example: `-3.14`.
-* String - a simple string value; curretly unused. Example: `foobar`.
+* __Instante vector:__ a set of time series containing a simple sample for each time series, all sharing the same timestamp. Example: `node_cpu_seconds_total`.
+* __Range vector:__ a set of time containing a range of data points over time for each time series. Example: `node_cpu_seconds_total[5m`.
+* __Scalar:__ a simple numeric floating point value. Example: `-3.14`.
+* __String:__ a simple string value; curretly unused. Example: `foobar`.
 
 
 * [__Arithmetic binary operators__](https://prometheus.io/docs/prometheus/latest/querying/operators/#arithmetic-binary-operators).
@@ -335,7 +335,7 @@ sum(rate(prometheus_http_requests_total[5m])) by (job)
 ## Service Discovery
 Service Discovery is the automatic detection of devices and services offered by these devices on a computer network.
 
-* Not really a service discovery mechanism
+* Not really a service discovery mechanism:
 ```yaml
 static_configs:
     - targets: ['localhost:9090']
@@ -344,7 +344,7 @@ static_configs:
 * Cluster managers (Kubernetes, Marathon, ...)
 * Generic mechanism (DNS, Consul, Zookerper, ...)
 
-### EC2 Example.
+### EC2 Example
 Add following config to prometheus.yaml
 ```yaml
 global:
