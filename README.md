@@ -462,8 +462,9 @@ scrape_configs:
 # Alerting
 ## Introduction to Alerting
 * Alerting in Prometheus is separated into 2 parts:
-  * Alerting rules in Prometheus Server
-  * Alertmanager
+  * __Alerting rules__ in Prometheus Server.
+  * __Alertmanager__.
+
 ![Prometheus alerting](images/prometheus_alerting.png)
 
 * Rules live in Prometheus server config
