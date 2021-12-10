@@ -467,13 +467,15 @@ scrape_configs:
 
 ![Prometheus alerting](images/prometheus_alerting.png)
 
-* Rules live in Prometheus server config
-* Best practice to separate the alerts from the prometheus config
-  * Add an include to /etc/prometheus/prometheus.yml
+* Rules live in Prometheus server config.
+* Best practice to separate the alerts from the prometheus config.
+  * Add an include to _/etc/prometheus/prometheus.yml_.
+
 ```yaml
 rule_files:
 - "/etc/prometheus/alert.rules"
 ```
+
 * Alert format:
 ```yaml
 ALERT <alert name>
@@ -482,6 +484,7 @@ ALERT <alert name>
     [ LABELS <label set> ]
     [ ANNOTATIONS <label set> ]
 ```
+
 * Alert example:
 ```yaml
 groups:
@@ -569,22 +572,22 @@ scrape_configs:
 ```
 
 * Concepts:
-  * Grouping: Groups similar alerts into 1 notification.
-  * Inhibition: Silences other alerts if one specified alert is already fired
-  * Silences: A simple way to mute certain notifications.
+  * __Grouping:__ Groups similar alerts into 1 notification.
+  * __Inhibition:__ Silences other alerts if one specified alert is already fired.
+  * __Silences:__ A simple way to mute certain notifications.
 
 * High availability
-  * You can create a high available Alertmanager cluster using mesh config
-  * Do not load balance this service
-    * Use a list of Alertmanager nodedes in Prometheus config
+  * You can create a high available Alertmanager cluster using mesh config.
+  * Do not load balance this service.
+    * Use a list of Alertmanager nodedes in Prometheus config.
   * All alerts are sent to all known Alertmanager nodes.
-  * No need to monitor the monitoring
+  * No need to monitor the monitoring.
 
 * Alert states:
-  * Inactive: No rule is met
-  * Pending: Rule is meet but can be supressed due to validations
-  * Firing: Alert is sent to the configured channel (mail, Slack, ...)
-* Runs on port: 9093
+  * __Inactive:__ No rule is met.
+  * __Pending:__ Rule is meet but can be supressed due to validations.
+  * __Firing:__ Alert is sent to the configured channel (mail, Slack, ...).
+* Runs on port: 9093.
 ![Prometheus alertmanager](images/prometheus_alertmanager.png)
 
 * Notifying multiple destinations:
