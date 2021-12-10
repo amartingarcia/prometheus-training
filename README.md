@@ -169,14 +169,9 @@ scrape_configs:
 
 
 ## Extras
-Links:
-```sh
-# Helm charts
-https://github.com/prometheus-community/helm-charts
 
-# Docs
-https://prometheus.io/docs/introduction/overview/
-```
+* https://github.com/prometheus-community/helm-charts
+* https://prometheus.io/docs/introduction/overview/
 
 
 # Monitoring
