@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: webapp-flask
+  # Change this to the namespace the Prometheus instance is running in
+  labels:
+    app: webapp-flask
+    release: prometheus
+spec:
+  endpoints:
+  - port: metrics
+    path: "/"
+    interval: 15s
+  selector:
+    matchLabels:
+      app: webapp-flask
