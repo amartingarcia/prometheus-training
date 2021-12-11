@@ -30,8 +30,6 @@
   - [Prometheus Security](#prometheus-security)
 - [Prometheus client implementations](#prometheus-client-implementations)
   - [Monitoring a web application - Python Flask](#monitoring-a-web-application---python-flask)
-  - [Calculating Apdex score](#calculating-apdex-score)
-  - [Monitoring a wb application - Java Spring](#monitoring-a-wb-application---java-spring)
   - [Extras](#extras-3)
 - [Another Use Cases](#another-use-cases)
   - [AWS Cloudwatch Exporter](#aws-cloudwatch-exporter)
@@ -75,7 +73,7 @@
 First step, create your enviroment:
 ```sh
 # Initial your test environment
-$ minikube start --network-plugin=cni --cni=calico -p prometheus
+$ minikube start --network-plugin=cni --cni=calico -p prometheus --cpus 2 --memory 1900
 
 # Install kubeprometheus stack
 $ helm install prometheus prometheus-community/kube-prometheus-stack
@@ -695,55 +693,15 @@ receivers:
 
 # Prometheus client implementations
 ## Monitoring a web application - Python Flask
-* i'm going to integrate __prometheus monitoring__ with a __web application__ based on _python_.
-  * i'll use the official __prometheus_client__ library for Python.
-  * __Flask__ is the web framework I'going to use
-    * It will create an __http server__ and I'll able to configure routes (e.g. /query)
-  * I'll use __mysqlclient__ for python to query a __MySQL__ database.
-    * I'll include one normal query and one __"bad behaving" query__ that will take between 0 and 10 seconds to execute.
+[Monitoring example](prometheus-webapp-flask/README.MD)
 
-![Prometheus webapp](images/prometheus_web_app.png)
-
-* I'm going to use the Counter and the Histogram metric types to capture the data:
-  * A Counter to capture the amount of times an http endpint is hit + to capture the amount of times a MySQL query is executed.
-    * The value of the Counter must Allways increase, that's why you should take the Counter type for these of data.
-  * A Histogram to capture the latency of the HTTP requests and the MySQL Queries.
-    *  A Histogram samples observations (like latencies) and counts them in configurable buckets. It also provies a sum of all observed values.
-    *  The default buckets are intended to cover a typical web/rpc request from milliseconds to seconds.
-
-* Define data types:
-```py
-from prometheus_client import Counter, Histogram
-
-FLASK_REQUEST_LATENCY = Histogram('flask_request_latency_seconds', 'Flask Request Latency',
-				['method', 'endpoint'])
-FLASK_REQUEST_COUNT = Counter('flask_request_count', 'Flask Request Count',
-				['method', 'endpoint', 'http_status'])
-
-MYSQL_REQUEST_LATENCY = Histogram('mysql_query_latency_seconds', 'MYSQL Query Latency',
-				['query'])
-MYSQL_REQUEST_COUNT = Counter('mysql_query_count', 'Flask Request Count',
-				['query']
-```
-
-* This is how we can calculate the latency of a query:
-```py
-start_time = time.time()
-sql = "select * from table"
-# do the query
-
-query_latency = time.time() - start_time
-
-MYSQL_REQUEST_LATENCY.labels(sql[:50]).observe(query_latency)
-MYSQL_REQUEST_COUNT.labels(sql[:50]).inc()
-```
-
-## Calculating Apdex score
-## Monitoring a wb application - Java Spring
 ## Extras
+* https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md
+
 
 # Another Use Cases
 ## AWS Cloudwatch Exporter
+* Link: https://github.com/prometheus/cloudwatch_exporter
 
 ## Grafana Provisioning
 * In one of the first lectures I showed you how to __setup Grafana using the UI__.
@@ -769,5 +727,23 @@ MYSQL_REQUEST_COUNT.labels(sql[:50]).inc()
     * Consul will discover your services, and these can then be automatically added to Promethues as a target.
 
 ## AWS EC2 Auto Discovery
+
+```yaml
+scrape_configs:
+  - job_name: 'node'
+    ec2_sd_configs:
+      - region: eu-west-1
+        access_key: PUT_THE_ACCESS_KEY_HERE
+        secret_key: PUT_THE_SECRET_KEY_HERE
+        port: 9100
+    relabel_configs:
+        # Only monitor instances with a Name starting with "SD Demo"
+      - source_labels: [__meta_ec2_tag_Name]
+        regex: SD Demo.*
+        action: keep
+        # Use the instance ID as the instance label
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance
+```
 
 ## Extras

@@ -2,7 +2,6 @@
 
 import time
 
-import _mysql
 import os
 
 from prometheus_client import Counter, Histogram
