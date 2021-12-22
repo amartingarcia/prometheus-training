@@ -131,9 +131,33 @@ alerting:
           # - alertmanager:9093
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+rule_files: []
+  # - "/etc/prometheus/rules/*.yaml"
+
+# A list of scrape configurations.
+scrape_configs: []
+  # - job_name: node-exporter
+  #   scrape_interval: 30s
+  #   scrape_timeout: 10s
+  #   metrics_path: /metrics
+  #   scheme: http
+  #   follow_redirects: true
+  #   ec2_sd_config:
+  #   - endpoints: ""
+  #     region: eu-west-1
+  #     refres_interval: 1m
+  #     port: 9100
+  #     filters:
+  #     - name: tag:monitoring
+  #       values:
+  #       - prometheus
+  #   relabel_configs:
+  #   - source_labels: [__address__]
+  #     separator: ;
+  #     regex: (.*)
+  #     target_label: instance
+  #     replacement: $1
+  #     action: replace
 ```
 
 > En el caso del Helm Chart kube-prometheus-stack la configuración se indica a través del values del Chart, concrétamente en [prometheusSpec](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml#L2023), además si nos fijamos en la API del operador de Prometheus podremos conocer todas las posibles [configuraciones](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#prometheusspec).
