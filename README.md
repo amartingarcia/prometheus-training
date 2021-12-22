@@ -70,6 +70,8 @@
 
 
 ## Prometheus instalation on Kubernetes
+Used Minikube and Helm Chart [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack).
+
 First step, create your enviroment:
 ```sh
 # Initial your test environment
@@ -82,12 +84,12 @@ $ helm install prometheus prometheus-community/kube-prometheus-stack
 $ kubectl get po
 
 NAME                                                     READY   STATUS    RESTARTS       AGE
-alertmanager-prometheus-kube-prometheus-alertmanager-0   2/2     Running   2 (142m ago)   21h
-prometheus-grafana-c8787f89b-hfvtv                       2/2     Running   2 (142m ago)   21h
-prometheus-kube-prometheus-operator-577bb648c5-dnd9q     1/1     Running   1 (142m ago)   21h
-prometheus-kube-state-metrics-58c5cd6ddb-2q2wr           1/1     Running   1 (142m ago)   21h
-prometheus-prometheus-kube-prometheus-prometheus-0       2/2     Running   2 (142m ago)   21h
-prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (142m ago)   21h
+alertmanager-prometheus-kube-prometheus-alertmanager-0   2/2     Running   2 (10m ago)   10m
+prometheus-grafana-c8787f89b-hfvtv                       2/2     Running   2 (10m ago)   10m
+prometheus-kube-prometheus-operator-577bb648c5-dnd9q     1/1     Running   1 (10m ago)   10m
+prometheus-kube-state-metrics-58c5cd6ddb-2q2wr           1/1     Running   1 (10m ago)   10m
+prometheus-prometheus-kube-prometheus-prometheus-0       2/2     Running   2 (10m ago)   10m
+prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (10m ago)   10m
 ```
 
 
@@ -111,8 +113,8 @@ prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (14
 
 
 ## Prometheus configuration
-* The configuration is stored in the Prometheus configuration file, in yaml format.
-* The default configuration looks like this:
+* The configuration is stored in the Prometheus configuration file __prometheus.yml__, in YAML format.
+* The [default configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#configuration-file) looks like this:
 
 ```yaml
 # my global config
@@ -129,10 +131,36 @@ alerting:
           # - alertmanager:9093
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+rule_files: []
+  # - "/etc/prometheus/rules/*.yaml"
+
+# A list of scrape configurations.
+scrape_configs: []
+  # - job_name: node-exporter
+  #   scrape_interval: 30s
+  #   scrape_timeout: 10s
+  #   metrics_path: /metrics
+  #   scheme: http
+  #   follow_redirects: true
+  #   ec2_sd_config:
+  #   - endpoints: ""
+  #     region: eu-west-1
+  #     refres_interval: 1m
+  #     port: 9100
+  #     filters:
+  #     - name: tag:monitoring
+  #       values:
+  #       - prometheus
+  #   relabel_configs:
+  #   - source_labels: [__address__]
+  #     separator: ;
+  #     regex: (.*)
+  #     target_label: instance
+  #     replacement: $1
+  #     action: replace
 ```
+
+> En el caso del Helm Chart kube-prometheus-stack la configuración se indica a través del values del Chart, concrétamente en [prometheusSpec](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml#L2023), además si nos fijamos en la API del operador de Prometheus podremos conocer todas las posibles [configuraciones](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#prometheusspec).
 
 
 ## Monitoring Nodes with Prometheus
@@ -184,6 +212,7 @@ scrape_configs:
 * Exposition formats:
   * Simple text-based format
   * Protocol-buffer format (Prometheus 2.0 removed support for the protocol-buffer format)
+
 ```
 metric_name [
   "{" label_name "=" `"` label_value `"` { "," label_name "=" `"` label_value `"` } [ "," ] "}"
@@ -268,7 +297,7 @@ if __name__ == '__main__':
 * If NAT or/both firewall is blocking you from using the pull mechanism.
   * Move the Prometheus Server on the same network.
 
-* Example
+* Example:
 ```py
 from prometheus_client import CollectorRegistry, Gauge, push_to_gateway, Summary, Histogram
 from time import sleep
@@ -492,7 +521,7 @@ groups:
     expr: job:request_latency_seconds:mean5m{job="myjob"} > 0.5
     for: 10m
     labels:
-      severity: page
+      severity: info
     annotations:
       summary: High request latency
 ```
@@ -527,6 +556,11 @@ global:
   # Ex: `slack_api_url_file: '/etc/alertmanager/slack_url'`
   slack_api_url: '<slack_webhook_url>'
 
+# Files from which custom notification template definitions are read.
+# The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'.
+templates: []
+  #- 'templates/*.tmpl'
+
 route:
   receiver: 'slack-notifications'
   repeat_interval: 1h
@@ -539,6 +573,14 @@ receivers:
   slack_configs:
   - channel: '#alerts'
     text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
+
+# A list of inhibition rules.
+inhibit_rules:
+  [ - <inhibit_rule> ... ]
+
+# A list of mute time intervals for muting routes.
+mute_time_intervals:
+  [ - <mute_time_interval> ... ]
 ```
 
 * Prometheus configuration:
