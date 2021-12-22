@@ -113,8 +113,8 @@ prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (10
 
 
 ## Prometheus configuration
-* The configuration is stored in the Prometheus configuration file __prometheus.yml__, in yaml format.
-* The default configuration looks like this:
+* The configuration is stored in the Prometheus configuration file __prometheus.yml__, in YAML format.
+* The [default configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#configuration-file) looks like this:
 
 ```yaml
 # my global config
