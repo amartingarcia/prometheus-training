@@ -70,6 +70,8 @@
 
 
 ## Prometheus instalation on Kubernetes
+Used Minikube and Helm Chart [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack).
+
 First step, create your enviroment:
 ```sh
 # Initial your test environment
@@ -82,12 +84,12 @@ $ helm install prometheus prometheus-community/kube-prometheus-stack
 $ kubectl get po
 
 NAME                                                     READY   STATUS    RESTARTS       AGE
-alertmanager-prometheus-kube-prometheus-alertmanager-0   2/2     Running   2 (142m ago)   21h
-prometheus-grafana-c8787f89b-hfvtv                       2/2     Running   2 (142m ago)   21h
-prometheus-kube-prometheus-operator-577bb648c5-dnd9q     1/1     Running   1 (142m ago)   21h
-prometheus-kube-state-metrics-58c5cd6ddb-2q2wr           1/1     Running   1 (142m ago)   21h
-prometheus-prometheus-kube-prometheus-prometheus-0       2/2     Running   2 (142m ago)   21h
-prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (142m ago)   21h
+alertmanager-prometheus-kube-prometheus-alertmanager-0   2/2     Running   2 (10m ago)   10m
+prometheus-grafana-c8787f89b-hfvtv                       2/2     Running   2 (10m ago)   10m
+prometheus-kube-prometheus-operator-577bb648c5-dnd9q     1/1     Running   1 (10m ago)   10m
+prometheus-kube-state-metrics-58c5cd6ddb-2q2wr           1/1     Running   1 (10m ago)   10m
+prometheus-prometheus-kube-prometheus-prometheus-0       2/2     Running   2 (10m ago)   10m
+prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (10m ago)   10m
 ```
 
 
@@ -111,7 +113,7 @@ prometheus-prometheus-node-exporter-lsg4d                1/1     Running   1 (14
 
 
 ## Prometheus configuration
-* The configuration is stored in the Prometheus configuration file, in yaml format.
+* The configuration is stored in the Prometheus configuration file __prometheus.yml__, in yaml format.
 * The default configuration looks like this:
 
 ```yaml
@@ -133,6 +135,8 @@ rule_files:
   # - "first_rules.yml"
   # - "second_rules.yml"
 ```
+
+> En el caso del Helm Chart kube-prometheus-stack la configuración se indica a través del values del Chart, concrétamente en [prometheusSpec](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml#L2023), además si nos fijamos en la API del operador de Prometheus podremos conocer todas las posibles [configuraciones](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#prometheusspec).
 
 
 ## Monitoring Nodes with Prometheus
@@ -184,6 +188,7 @@ scrape_configs:
 * Exposition formats:
   * Simple text-based format
   * Protocol-buffer format (Prometheus 2.0 removed support for the protocol-buffer format)
+
 ```
 metric_name [
   "{" label_name "=" `"` label_value `"` { "," label_name "=" `"` label_value `"` } [ "," ] "}"
