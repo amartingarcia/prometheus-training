@@ -297,7 +297,7 @@ if __name__ == '__main__':
 * If NAT or/both firewall is blocking you from using the pull mechanism.
   * Move the Prometheus Server on the same network.
 
-* Example
+* Example:
 ```py
 from prometheus_client import CollectorRegistry, Gauge, push_to_gateway, Summary, Histogram
 from time import sleep
@@ -521,7 +521,7 @@ groups:
     expr: job:request_latency_seconds:mean5m{job="myjob"} > 0.5
     for: 10m
     labels:
-      severity: page
+      severity: info
     annotations:
       summary: High request latency
 ```
@@ -556,6 +556,11 @@ global:
   # Ex: `slack_api_url_file: '/etc/alertmanager/slack_url'`
   slack_api_url: '<slack_webhook_url>'
 
+# Files from which custom notification template definitions are read.
+# The last component may use a wildcard matcher, e.g. 'templates/*.tmpl'.
+templates: []
+  #- 'templates/*.tmpl'
+
 route:
   receiver: 'slack-notifications'
   repeat_interval: 1h
@@ -568,6 +573,14 @@ receivers:
   slack_configs:
   - channel: '#alerts'
     text: 'https://internal.myorg.net/wiki/alerts/{{ .GroupLabels.app }}/{{ .GroupLabels.alertname }}'
+
+# A list of inhibition rules.
+inhibit_rules:
+  [ - <inhibit_rule> ... ]
+
+# A list of mute time intervals for muting routes.
+mute_time_intervals:
+  [ - <mute_time_interval> ... ]
 ```
 
 * Prometheus configuration:
