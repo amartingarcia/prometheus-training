@@ -38,6 +38,7 @@
   - [Consul integration with Prometheus](#consul-integration-with-prometheus)
   - [AWS EC2 Auto Discovery](#aws-ec2-auto-discovery)
   - [Extras](#extras-4)
+    - [Loki Stack](#loki-stack)
 
 # Introduction to Prometheus
 ## Prometheus Overview
@@ -789,3 +790,30 @@ scrape_configs:
 ```
 
 ## Extras
+### Loki Stack
+Loki Stack, se compone de varias herramientas definidas en su [repositorio de Github](https://github.com/grafana/helm-charts/tree/main/charts/loki-stack). 
+Aunque nosotros en este caso vamos a utilizar:
+* Loki: es la herramienta central al que los agentes envían los logs, (basado en prometheus).
+* Promtail: agente que envía los registros a Loki.
+* Prometheus: no desplegamos prometheus, solo desplegamos el datasource de Grafana para Loki.
+
+
+Estos ejemplos los estamos escenificando en Kubernetes, pero si quisieramos monitorizar algo externo a Kubernetes, por ejemplo, un nodo en el que se ejecutan contenedores de Docker, podriamos solucionarlo desplegando un contenedor en dicho nodo, y añadiendo como volumen el directorio de logs de Docker. 
+
+Para el envío de logs a Loki-Kubernetes habilitaríamos el ingress en la configuración del Helm Chart de Loki-Stack:
+```yaml
+    ingress:
+      enabled: true
+      ## if use traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: web
+      hosts:
+        - host: ''
+          paths: ["/loki/"]
+```
+
+El fichero de configuración podría ser [este](extras/promtail-config.yaml), sería necesario indicar el balanceador/ip del ingress controller de Kubernetes:
+
+```sh
+docker run --name promtail -d -v $(pwd):/mnt/config -v /var/lib/docker:/var/lib/docker grafana/promtail:2.4.2 -config.file=/mnt/config/promtail-config.yaml
+```
