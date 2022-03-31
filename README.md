@@ -1,4 +1,4 @@
-# Training Prometheus
+# Training Prometheus 
 
 # Table of contents
 - [Training Prometheus](#training-prometheus)
